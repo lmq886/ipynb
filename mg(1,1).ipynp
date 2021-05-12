@@ -1,0 +1,31 @@
+def mg(x,times,time0):
+    """
+    x 为数据不能有缺失值
+    times 为时间序列
+    time0 第一个时间
+    """
+#     print(x[0])
+    unaddsummean = -x.expanding(1).sum().rolling(2,2).mean()[1:].values
+#     print(unaddsummean)
+    Yn = x[1:].values
+#     print(Yn)
+    BT = np.vstack((np.array(unaddsummean),np.array([1 for _ in range(len(unaddsummean))])))
+#     print(BT)
+    a_ = np.dot(np.matrix(np.dot(BT,BT.T)).I,np.dot(BT,Yn))
+    a = a_[[0],[0]]
+#     print(a)
+    u=a_[[0],[1]]
+#     print(u)
+    x2=[]
+    for i in times:
+        x2.append(np.float(((x[0]-u/a)*np.exp(-a*(i - time0))+u/a)))
+#     print(x2)
+    yc = [x[0]] 
+    for m in range(1,len(x2)):
+        yc.append(x2[m]-x2[m-1])
+#     print(yc)
+    plt.plot(range(len(x)),x,label='真实')
+    plt.plot(range(len(yc)),yc,label='预测')
+    plt.legend()
+    plt.show()
+    return yc
